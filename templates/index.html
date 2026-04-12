@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ActiveSG Booking Link</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            background-color: #f5f5f5;
+        }
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 32px 40px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+            max-width: 600px;
+            width: 90%;
+            text-align: center;
+        }
+        h1 { margin-bottom: 4px; color: #1a1a1a; }
+        .date { color: #666; margin-bottom: 24px; font-size: 1.1rem; }
+        .link-box {
+            background: #f0f4ff;
+            border: 1px solid #c7d4ff;
+            border-radius: 8px;
+            padding: 12px 16px;
+            word-break: break-all;
+            font-size: 0.8rem;
+            color: #2a2a2a;
+            margin-bottom: 20px;
+            text-align: left;
+        }
+        .btn-row { display: flex; gap: 12px; justify-content: center; }
+        a.btn, button.btn {
+            padding: 12px 24px;
+            font-size: 1rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+        }
+        a.btn-primary { background: #d63384; color: white; }
+        a.btn-primary:hover { background: #b02a6b; }
+        button.btn-secondary { background: #e0e0e0; color: #333; }
+        button.btn-secondary:hover { background: #c8c8c8; }
+        .copied { color: green; font-size: 0.9rem; margin-top: 10px; display: none; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>ActiveSG Booking</h1>
+        <p class="date">6pm &amp; 7pm slot &mdash; {{ date }}</p>
+        <div class="link-box">{{ url }}</div>
+        <div class="btn-row">
+            <a class="btn btn-primary" href="{{ url }}" target="_blank">Open booking page</a>
+            <button class="btn btn-secondary" onclick="copyLink()">Copy link</button>
+        </div>
+        <p class="copied" id="copied">Copied!</p>
+    </div>
+
+    <script>
+        function copyLink() {
+            navigator.clipboard.writeText("{{ url }}").then(() => {
+                const el = document.getElementById('copied');
+                el.style.display = 'block';
+                setTimeout(() => el.style.display = 'none', 2000);
+            });
+        }
+    </script>
+</body>
+</html>
