@@ -26,6 +26,34 @@
         }
         h1 { margin-bottom: 4px; color: #1a1a1a; }
         .date { color: #666; margin-bottom: 24px; font-size: 1.1rem; }
+        .slots {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+        .slot-btn {
+            padding: 10px 18px;
+            border: 2px solid #c7d4ff;
+            border-radius: 8px;
+            background: #f0f4ff;
+            color: #2a2a2a;
+            font-size: 1rem;
+            cursor: pointer;
+            user-select: none;
+            transition: background 0.15s, border-color 0.15s;
+        }
+        .slot-btn.selected {
+            background: #d63384;
+            border-color: #d63384;
+            color: white;
+        }
+        .hint {
+            color: #888;
+            font-size: 0.85rem;
+            margin-bottom: 20px;
+        }
         .link-box {
             background: #f0f4ff;
             border: 1px solid #c7d4ff;
@@ -36,6 +64,7 @@
             color: #2a2a2a;
             margin-bottom: 20px;
             text-align: left;
+            min-height: 2.5em;
         }
         .btn-row { display: flex; gap: 12px; justify-content: center; }
         a.btn, button.btn {
@@ -49,6 +78,10 @@
         }
         a.btn-primary { background: #d63384; color: white; }
         a.btn-primary:hover { background: #b02a6b; }
+        a.btn-primary.disabled {
+            background: #e0a0c0;
+            pointer-events: none;
+        }
         button.btn-secondary { background: #e0e0e0; color: #333; }
         button.btn-secondary:hover { background: #c8c8c8; }
         .copied { color: green; font-size: 0.9rem; margin-top: 10px; display: none; }
@@ -57,18 +90,60 @@
 <body>
     <div class="card">
         <h1>ActiveSG Booking</h1>
-        <p class="date">6pm &amp; 7pm slot &mdash; {{ date }}</p>
-        <div class="link-box">{{ url }}</div>
+        <p class="date">{{ date }}</p>
+
+        <div class="slots">
+            {% for slot in slots %}
+            <div class="slot-btn" data-ts="{{ slot.ts }}" onclick="toggleSlot(this)">{{ slot.label }}</div>
+            {% endfor %}
+        </div>
+        <p class="hint">Select 1 or 2 slots</p>
+
+        <div class="link-box" id="link-box">—</div>
         <div class="btn-row">
-            <a class="btn btn-primary" href="{{ url }}" target="_blank">Open booking page</a>
+            <a class="btn btn-primary disabled" id="open-btn" href="#" target="_blank">Open booking page</a>
             <button class="btn btn-secondary" onclick="copyLink()">Copy link</button>
         </div>
         <p class="copied" id="copied">Copied!</p>
     </div>
 
     <script>
+        const BASE = "{{ base_url }}&date={{ date }}";
+        let selected = [];
+
+        function toggleSlot(el) {
+            const ts = el.dataset.ts;
+            if (selected.includes(ts)) {
+                selected = selected.filter(t => t !== ts);
+                el.classList.remove('selected');
+            } else {
+                if (selected.length >= 2) return;
+                selected.push(ts);
+                el.classList.add('selected');
+            }
+            updateUrl();
+        }
+
+        function updateUrl() {
+            const linkBox = document.getElementById('link-box');
+            const openBtn = document.getElementById('open-btn');
+            if (selected.length === 0) {
+                linkBox.textContent = '—';
+                openBtn.href = '#';
+                openBtn.classList.add('disabled');
+                return;
+            }
+            const url = BASE + selected.map(ts => '&timeslots=' + ts).join('');
+            linkBox.textContent = url;
+            openBtn.href = url;
+            openBtn.classList.remove('disabled');
+        }
+
         function copyLink() {
-            navigator.clipboard.writeText("{{ url }}").then(() => {
+            const linkBox = document.getElementById('link-box');
+            const text = linkBox.textContent;
+            if (text === '—') return;
+            navigator.clipboard.writeText(text).then(() => {
                 const el = document.getElementById('copied');
                 el.style.display = 'block';
                 setTimeout(() => el.style.display = 'none', 2000);
