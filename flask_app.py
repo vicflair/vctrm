@@ -8,7 +8,7 @@ ACTIVITY_ID = 'B0KovYOcQun1mA4VowDq0'
 VENUE_ID = 'pJtsNwSdC2fgSg5oWPdf1'
 DAYS_AHEAD = 12
 SG_TZ = ZoneInfo('Asia/Singapore')
-SITE_TZ = ZoneInfo('Asia/Tokyo')  # ActiveSG encodes timestamps in UTC+9
+SITE_TZ = ZoneInfo('Asia/Singapore')  # ActiveSG encodes timestamps in SGT (UTC+8)
 
 
 BASE_URL = (
