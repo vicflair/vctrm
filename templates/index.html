@@ -49,6 +49,13 @@
             border-color: #d63384;
             color: white;
         }
+        .section-label {
+            color: #888;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 8px;
+        }
         .hint {
             color: #888;
             font-size: 0.85rem;
@@ -92,6 +99,14 @@
         <h1>ActiveSG Booking</h1>
         <p class="date">{{ date }}</p>
 
+        <p class="section-label">Court</p>
+        <div class="slots" style="margin-bottom: 20px;">
+            {% for venue in venues %}
+            <div class="slot-btn{% if loop.first %} selected{% endif %}" data-venue-id="{{ venue.id }}" onclick="selectVenue(this)">{{ venue.name }}</div>
+            {% endfor %}
+        </div>
+
+        <p class="section-label">Time</p>
         <div class="slots">
             {% for slot in slots %}
             <div class="slot-btn" data-ts="{{ slot.ts }}" onclick="toggleSlot(this)">{{ slot.label }}</div>
@@ -108,8 +123,25 @@
     </div>
 
     <script>
-        const BASE = "{{ base_url }}&date={{ date }}";
+        const ACTIVITY_ID = "{{ activity_id }}";
+        const BASE_URL_TEMPLATE = "{{ base_url_template }}";
+        const DATE = "{{ date }}";
+        let selectedVenueId = "{{ venues[0].id }}";
         let selected = [];
+
+        function buildBase() {
+            return BASE_URL_TEMPLATE
+                .replace(/{activity_id}/g, ACTIVITY_ID)
+                .replace(/{venue_id}/g, selectedVenueId)
+                + '&date=' + DATE;
+        }
+
+        function selectVenue(el) {
+            document.querySelectorAll('[data-venue-id]').forEach(b => b.classList.remove('selected'));
+            el.classList.add('selected');
+            selectedVenueId = el.dataset.venueId;
+            updateUrl();
+        }
 
         function toggleSlot(el) {
             const ts = el.dataset.ts;
@@ -133,7 +165,7 @@
                 openBtn.classList.add('disabled');
                 return;
             }
-            const url = BASE + selected.map(ts => '&timeslots=' + ts).join('');
+            const url = buildBase() + selected.map(ts => '&timeslots=' + ts).join('');
             linkBox.textContent = url;
             openBtn.href = url;
             openBtn.classList.remove('disabled');

@@ -5,16 +5,19 @@ from zoneinfo import ZoneInfo
 app = Flask(__name__)
 
 ACTIVITY_ID = 'B0KovYOcQun1mA4VowDq0'
-VENUE_ID = 'pJtsNwSdC2fgSg5oWPdf1'
 DAYS_AHEAD = 12
 SG_TZ = ZoneInfo('Asia/Singapore')
 SITE_TZ = ZoneInfo('Asia/Singapore')  # ActiveSG encodes timestamps in SGT (UTC+8)
 
+VENUES = [
+    {'name': 'Kallang', 'id': 'pJtsNwSdC2fgSg5oWPdf1'},
+    {'name': 'Heartbeat', 'id': 'qFjN7QRByrxM5Ikhv9UQm'},
+]
 
-BASE_URL = (
-    f"https://activesg.gov.sg/facility-bookings/activities/{ACTIVITY_ID}"
-    f"/venues/{VENUE_ID}/timeslots"
-    f"?activityId={ACTIVITY_ID}&venueId={VENUE_ID}"
+BASE_URL_TEMPLATE = (
+    "https://activesg.gov.sg/facility-bookings/activities/{activity_id}"
+    "/venues/{venue_id}/timeslots"
+    "?activityId={activity_id}&venueId={venue_id}"
 )
 
 
@@ -33,7 +36,8 @@ def index():
     ]
 
     return render_template('index.html', date=date_str, slots=slots,
-                           base_url=BASE_URL, activity_id=ACTIVITY_ID, venue_id=VENUE_ID)
+                           activity_id=ACTIVITY_ID, venues=VENUES,
+                           base_url_template=BASE_URL_TEMPLATE)
 
 
 if __name__ == '__main__':
