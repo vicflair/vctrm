@@ -25,7 +25,7 @@ BASE_URL_TEMPLATE = (
 def index():
     today = datetime.now(SG_TZ).date()
     target_date = today + timedelta(days=DAYS_AHEAD)
-    date_str = target_date.strftime('%Y-%m-%d')
+    date_str = target_date.strftime('%A, %Y-%m-%d')
 
     slots = [
         {
