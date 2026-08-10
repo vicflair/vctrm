@@ -25,6 +25,7 @@ BASE_URL_TEMPLATE = (
 def index():
     today = datetime.now(SG_TZ).date()
     target_date = today + timedelta(days=DAYS_AHEAD)
+    date_param = target_date.strftime('%Y-%m-%d')
     date_str = target_date.strftime('%A, %Y-%m-%d')
 
     slots = [
@@ -35,7 +36,7 @@ def index():
         for h in range(17, 22)  # 5pm to 9pm
     ]
 
-    return render_template('index.html', date=date_str, slots=slots,
+    return render_template('index.html', date=date_str, date_param=date_param, slots=slots,
                            activity_id=ACTIVITY_ID, venues=VENUES,
                            base_url_template=BASE_URL_TEMPLATE)
 
