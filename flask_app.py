@@ -4,6 +4,12 @@ from zoneinfo import ZoneInfo
 
 app = Flask(__name__)
 
+
+@app.after_request
+def prevent_search_indexing(response):
+    response.headers['X-Robots-Tag'] = 'noindex, nofollow'
+    return response
+
 ACTIVITY_ID = 'B0KovYOcQun1mA4VowDq0'
 DAYS_AHEAD = 12
 SG_TZ = ZoneInfo('Asia/Singapore')
