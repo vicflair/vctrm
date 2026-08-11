@@ -1,186 +1,440 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ActiveSG Booking Link</title>
+    <meta name="color-scheme" content="dark">
+    <title>Singapore Tennis Launchers</title>
     <style>
+        :root {
+            --bg: #08110f;
+            --panel: #10201b;
+            --panel-soft: #132820;
+            --line: #28483d;
+            --text: #f1f8f4;
+            --muted: #93aca1;
+            --hub: #49e6a2;
+            --hub-bright: #d7ff68;
+            --centre: #f05b9d;
+            --centre-bright: #ff9ec9;
+            --shadow: 0 24px 75px rgba(0, 0, 0, .32);
+        }
+
+        * { box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
         body {
-            font-family: sans-serif;
-            display: flex;
-            flex-direction: column;
+            margin: 0;
+            min-height: 100vh;
+            color: var(--text);
+            background:
+                radial-gradient(circle at 15% 8%, rgba(73, 230, 162, .12), transparent 28rem),
+                radial-gradient(circle at 88% 18%, rgba(240, 91, 157, .09), transparent 24rem),
+                var(--bg);
+            font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            opacity: .22;
+            background-image: linear-gradient(rgba(255,255,255,.025) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.025) 1px, transparent 1px);
+            background-size: 32px 32px;
+        }
+
+        button, input, select { font: inherit; }
+        button, a { -webkit-tap-highlight-color: transparent; }
+        .shell { width: min(920px, calc(100% - 30px)); margin: 0 auto; padding: 54px 0 72px; }
+        .hero { margin-bottom: 28px; }
+        .eyebrow, .kicker { margin: 0; color: var(--hub); font: 750 11px/1.2 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .14em; text-transform: uppercase; }
+        .hero h1 { margin: 10px 0 12px; font-size: clamp(36px, 7vw, 66px); line-height: .98; letter-spacing: -.055em; }
+        .lede { max-width: 680px; margin: 0; color: #b7cbc2; font-size: 18px; line-height: 1.55; }
+
+        .tabs {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            padding: 7px;
+            margin-bottom: 18px;
+            border: 1px solid var(--line);
+            border-radius: 16px;
+            background: rgba(8, 20, 16, .82);
+            box-shadow: var(--shadow);
+        }
+
+        .tab {
+            min-height: 54px;
+            padding: 8px 16px;
+            border: 1px solid transparent;
+            border-radius: 11px;
+            color: var(--muted);
+            background: transparent;
+            cursor: pointer;
+            font-weight: 750;
+            transition: .16s ease;
+        }
+
+        .tab:hover { color: var(--text); background: rgba(255,255,255,.03); }
+        .tab[aria-selected="true"] { color: var(--text); border-color: var(--line); background: var(--panel-soft); }
+        .tab[data-tab="centre"][aria-selected="true"] { box-shadow: inset 0 -2px var(--centre); }
+        .tab[data-tab="hub"][aria-selected="true"] { box-shadow: inset 0 -2px var(--hub); }
+        .tab-panel[hidden] { display: none; }
+
+        .panel {
+            padding: 28px;
+            border: 1px solid var(--line);
+            border-radius: 20px;
+            background: linear-gradient(145deg, rgba(18, 39, 32, .95), rgba(11, 25, 21, .98));
+            box-shadow: var(--shadow);
+        }
+
+        .panel + .panel { margin-top: 16px; }
+        .panel-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 18px; margin-bottom: 24px; }
+        .panel-head h2 { margin: 5px 0 0; font-size: 25px; letter-spacing: -.025em; }
+        .panel-head p:not(.kicker) { margin: 7px 0 0; color: var(--muted); line-height: 1.5; }
+        .badge { padding: 7px 10px; border: 1px solid var(--line); border-radius: 99px; color: var(--muted); font-size: 12px; white-space: nowrap; }
+        .centre-accent { color: var(--centre); }
+        .hub-accent { color: var(--hub); }
+
+        .section-label { margin: 22px 0 9px; color: var(--muted); font-size: 12px; font-weight: 750; letter-spacing: .08em; text-transform: uppercase; }
+        .choices { display: flex; flex-wrap: wrap; gap: 9px; }
+        .choice {
+            min-height: 44px;
+            padding: 0 16px;
+            border: 1px solid var(--line);
+            border-radius: 10px;
+            color: #c6d7cf;
+            background: rgba(255,255,255,.025);
+            cursor: pointer;
+            transition: .15s ease;
+        }
+        .choice:hover { border-color: #416c5c; }
+        .choice.selected { color: #170810; border-color: var(--centre); background: var(--centre); }
+
+        .hint { margin: 9px 0 0; color: var(--muted); font-size: 13px; }
+        .output { margin-top: 24px; }
+        .url-box { min-height: 50px; padding: 14px; overflow-wrap: anywhere; border: 1px solid var(--line); border-radius: 12px; color: #bad8ca; background: #07130f; font: 12px/1.55 ui-monospace, SFMono-Regular, Menlo, monospace; }
+        .actions, .bookmark-row { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 12px; }
+        .btn, .bookmarklet {
+            display: inline-flex;
             align-items: center;
             justify-content: center;
-            min-height: 100vh;
-            margin: 0;
-            background-color: #f5f5f5;
-        }
-        .card {
-            background: white;
-            border-radius: 12px;
-            padding: 32px 40px;
-            box-shadow: 0 2px 12px rgba(0,0,0,0.1);
-            max-width: 600px;
-            width: 90%;
-            text-align: center;
-        }
-        h1 { margin-bottom: 4px; color: #1a1a1a; }
-        .date { color: #666; margin-bottom: 24px; font-size: 1.1rem; }
-        .slots {
-            display: flex;
-            gap: 10px;
-            justify-content: center;
-            margin-bottom: 24px;
-            flex-wrap: wrap;
-        }
-        .slot-btn {
-            padding: 10px 18px;
-            border: 2px solid #c7d4ff;
-            border-radius: 8px;
-            background: #f0f4ff;
-            color: #2a2a2a;
-            font-size: 1rem;
+            min-height: 46px;
+            padding: 0 17px;
+            border: 1px solid var(--line);
+            border-radius: 11px;
+            color: var(--text);
+            background: rgba(255,255,255,.035);
             cursor: pointer;
-            user-select: none;
-            transition: background 0.15s, border-color 0.15s;
-        }
-        .slot-btn.selected {
-            background: #d63384;
-            border-color: #d63384;
-            color: white;
-        }
-        .section-label {
-            color: #888;
-            font-size: 0.8rem;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            margin-bottom: 8px;
-        }
-        .hint {
-            color: #888;
-            font-size: 0.85rem;
-            margin-bottom: 20px;
-        }
-        .link-box {
-            background: #f0f4ff;
-            border: 1px solid #c7d4ff;
-            border-radius: 8px;
-            padding: 12px 16px;
-            word-break: break-all;
-            font-size: 0.8rem;
-            color: #2a2a2a;
-            margin-bottom: 20px;
-            text-align: left;
-            min-height: 2.5em;
-        }
-        .btn-row { display: flex; gap: 12px; justify-content: center; }
-        a.btn, button.btn {
-            padding: 12px 24px;
-            font-size: 1rem;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
+            font-weight: 750;
             text-decoration: none;
-            display: inline-block;
+            transition: .15s ease;
         }
-        a.btn-primary { background: #d63384; color: white; }
-        a.btn-primary:hover { background: #b02a6b; }
-        a.btn-primary.disabled {
-            background: #e0a0c0;
-            pointer-events: none;
+        .btn:hover, .bookmarklet:hover { transform: translateY(-1px); border-color: #487160; }
+        .btn.disabled { opacity: .45; pointer-events: none; }
+        .btn-centre { color: white; border-color: var(--centre); background: var(--centre); }
+        .btn-hub { color: #03130b; border: 0; background: linear-gradient(105deg, var(--hub), var(--hub-bright)); }
+
+        .hub-form { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+        .field { display: grid; gap: 8px; }
+        .field-wide { grid-column: 1 / -1; }
+        .field span { color: #cbdad3; font-size: 14px; font-weight: 700; }
+        .field small { color: var(--muted); line-height: 1.45; }
+        input, select {
+            width: 100%;
+            min-height: 50px;
+            padding: 0 13px;
+            border: 1px solid var(--line);
+            border-radius: 11px;
+            outline: 0;
+            color: var(--text);
+            background: #071510;
         }
-        button.btn-secondary { background: #e0e0e0; color: #333; }
-        button.btn-secondary:hover { background: #c8c8c8; }
-        .copied { color: green; font-size: 0.9rem; margin-top: 10px; display: none; }
+        input:focus, select:focus { border-color: var(--hub); box-shadow: 0 0 0 3px rgba(73,230,162,.1); }
+        .hub-form .btn { grid-column: 1 / -1; }
+
+        .launch-results { display: grid; gap: 14px; margin-top: 16px; }
+        .result { padding: 22px; border: 1px solid var(--line); border-radius: 16px; background: rgba(255,255,255,.018); }
+        .result h3 { margin: 0 0 8px; font-size: 18px; }
+        .result p { margin: 0; color: #b1c7bd; line-height: 1.55; }
+        .bookmark-row { padding: 12px; border: 1px dashed #3e6958; border-radius: 12px; background: rgba(0,0,0,.14); }
+        .bookmarklet { flex: 1; min-width: 230px; color: #03130b; border: 0; background: var(--hub); }
+        .micro { margin-top: 10px !important; color: var(--muted) !important; font-size: 12px; }
+        code { color: #b7efd5; }
+
+        .toast { position: fixed; right: 18px; bottom: 18px; padding: 11px 15px; border: 1px solid rgba(73,230,162,.4); border-radius: 11px; background: #11251e; opacity: 0; transform: translateY(8px); pointer-events: none; transition: .18s ease; box-shadow: var(--shadow); }
+        .toast.show { opacity: 1; transform: translateY(0); }
+
+        @media (max-width: 650px) {
+            .shell { padding-top: 36px; }
+            .tabs, .hub-form { grid-template-columns: 1fr; }
+            .field-wide, .hub-form .btn { grid-column: auto; }
+            .panel { padding: 21px; }
+            .panel-head { flex-direction: column; }
+            .badge { white-space: normal; }
+            .actions > *, .bookmark-row > * { width: 100%; }
+        }
     </style>
 </head>
 <body>
-    <div class="card">
-        <h1>ActiveSG Booking</h1>
-        <p class="date">{{ date }}</p>
+    <main class="shell">
+        <header class="hero">
+            <p class="eyebrow">Singapore court utilities</p>
+            <h1>Tennis launchers</h1>
+            <p class="lede">Two compounds, two booking systems, one focused page for preparing the fastest reliable entry point.</p>
+        </header>
 
-        <p class="section-label">Court</p>
-        <div class="slots" style="margin-bottom: 20px;">
-            {% for venue in venues %}
-            <div class="slot-btn{% if loop.first %} selected{% endif %}" data-venue-id="{{ venue.id }}" onclick="selectVenue(this)">{{ venue.name }}</div>
-            {% endfor %}
-        </div>
+        <nav class="tabs" role="tablist" aria-label="Tennis compound">
+            <button class="tab" id="tab-centre" data-tab="centre" role="tab" aria-selected="true" aria-controls="panel-centre">Kallang Tennis Centre</button>
+            <button class="tab" id="tab-hub" data-tab="hub" role="tab" aria-selected="false" aria-controls="panel-hub">Kallang Tennis Hub</button>
+        </nav>
 
-        <p class="section-label">Time</p>
-        <div class="slots">
-            {% for slot in slots %}
-            <div class="slot-btn" data-ts="{{ slot.ts }}" onclick="toggleSlot(this)">{{ slot.label }}</div>
-            {% endfor %}
-        </div>
-        <p class="hint">Select 1 or 2 slots</p>
+        <section class="tab-panel" id="panel-centre" role="tabpanel" aria-labelledby="tab-centre">
+            <article class="panel">
+                <div class="panel-head">
+                    <div>
+                        <p class="kicker centre-accent">ActiveSG</p>
+                        <h2>Kallang Tennis Centre</h2>
+                        <p>{{ date }} · select one or two adjacent timeslots.</p>
+                    </div>
+                    <span class="badge">{{ slots|length }} evening slots</span>
+                </div>
 
-        <div class="link-box" id="link-box">—</div>
-        <div class="btn-row">
-            <a class="btn btn-primary disabled" id="open-btn" href="#" target="_blank">Open booking page</a>
-            <button class="btn btn-secondary" onclick="copyLink()">Copy link</button>
-        </div>
-        <p class="copied" id="copied">Copied!</p>
-    </div>
+                <p class="section-label">Venue</p>
+                <div class="choices">
+                    {% for venue in venues %}
+                    <button class="choice{% if loop.first %} selected{% endif %}" type="button" data-venue-id="{{ venue.id }}">{{ venue.name }}</button>
+                    {% endfor %}
+                </div>
+
+                <p class="section-label">Time</p>
+                <div class="choices">
+                    {% for slot in slots %}
+                    <button class="choice" type="button" data-timeslot="{{ slot.ts }}">{{ slot.label }}</button>
+                    {% endfor %}
+                </div>
+                <p class="hint">Select 1 or 2 slots.</p>
+
+                <div class="output">
+                    <div class="url-box" id="centre-url">Select a time to generate the ActiveSG link.</div>
+                    <div class="actions">
+                        <a class="btn btn-centre disabled" id="centre-open" href="#" target="_blank" rel="noopener">Open booking page</a>
+                        <button class="btn" id="centre-copy" type="button">Copy link</button>
+                    </div>
+                </div>
+            </article>
+        </section>
+
+        <section class="tab-panel" id="panel-hub" role="tabpanel" aria-labelledby="tab-hub" hidden>
+            <article class="panel">
+                <div class="panel-head">
+                    <div>
+                        <p class="kicker hub-accent">Perfect Gym</p>
+                        <h2>Kallang Tennis Hub</h2>
+                        <p>Prepare an “any available court” launch and make the timed click yourself.</p>
+                    </div>
+                    <span class="badge">Stops at booking modal</span>
+                </div>
+
+                <form class="hub-form" id="hub-form">
+                    <label class="field field-wide">
+                        <span>Court group</span>
+                        <select id="hub-category">
+                            <option value="83">Any outdoor / rooftop court — recommended</option>
+                            <option value="85">Any indoor / show court</option>
+                            <option value="87">Any junior court</option>
+                        </select>
+                        <small>Kallang assigns a specific available court after the slot is clicked.</small>
+                    </label>
+                    <label class="field">
+                        <span>Booking date</span>
+                        <input id="hub-date" type="date" required>
+                    </label>
+                    <label class="field">
+                        <span>Start time</span>
+                        <input id="hub-time" type="time" value="18:00" step="3600" required>
+                    </label>
+                    <button class="btn btn-hub" type="submit">Generate launch kit</button>
+                </form>
+            </article>
+
+            <div class="launch-results" id="hub-results" hidden>
+                <article class="result">
+                    <h3>1. Open the staging page early</h3>
+                    <p>This signs you in and loads Kallang on the preceding date, keeping the target request fresh for release time.</p>
+                    <div class="actions">
+                        <a class="btn btn-hub" id="hub-staging" target="_blank" rel="noopener">Open staging page</a>
+                        <button class="btn" id="hub-copy-staging" type="button">Copy URL</button>
+                    </div>
+                </article>
+
+                <article class="result">
+                    <h3>2. Save the timed-click bookmark</h3>
+                    <p>Drag the green link to your bookmarks bar. From the staged Kallang tab, click it at release time. It loads fresh availability, clicks only the exact slot, and stops at the first modal.</p>
+                    <div class="bookmark-row">
+                        <a class="bookmarklet" id="hub-bookmarklet">🎾 Book target slot</a>
+                        <button class="btn" id="hub-copy-bookmarklet" type="button">Copy bookmark URL</button>
+                    </div>
+                    <p class="micro">After the modal opens, manually click <strong>Next → Add to cart → Book now</strong>. If Chrome strips <code>javascript:</code>, type that prefix manually before pasting the bookmark URL.</p>
+                </article>
+
+                <article class="result">
+                    <h3>Plain target link</h3>
+                    <p>Use this instead if you prefer to click the matching calendar slot yourself after the page loads.</p>
+                    <div class="url-box" id="hub-target-url"></div>
+                    <div class="actions">
+                        <a class="btn" id="hub-target" target="_blank" rel="noopener">Open target page</a>
+                        <button class="btn" id="hub-copy-target" type="button">Copy URL</button>
+                    </div>
+                </article>
+            </div>
+        </section>
+    </main>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
     <script>
-        const ACTIVITY_ID = "{{ activity_id }}";
-        const BASE_URL_TEMPLATE = "{{ base_url_template }}";
-        const DATE = "{{ date_param }}";
-        let selectedVenueId = "{{ venues[0].id }}";
-        let selected = [];
+        const ACTIVE_ACTIVITY_ID = {{ activity_id|tojson }};
+        const ACTIVE_BASE_TEMPLATE = {{ base_url_template|tojson }};
+        const ACTIVE_DATE = {{ date_param|tojson }};
+        let activeVenueId = {{ venues[0].id|tojson }};
+        let activeTimeslots = [];
 
-        function buildBase() {
-            return BASE_URL_TEMPLATE
-                .replace(/{activity_id}/g, ACTIVITY_ID)
-                .replace(/{venue_id}/g, selectedVenueId)
-                + '&date=' + DATE;
+        const HUB_BASE = "https://thekallang.perfectgym.com/clientportal2/";
+        let toastTimer;
+
+        document.querySelectorAll('[role="tab"]').forEach(tab => {
+            tab.addEventListener('click', () => activateTab(tab.dataset.tab));
+        });
+
+        function activateTab(name) {
+            document.querySelectorAll('[role="tab"]').forEach(tab => {
+                tab.setAttribute('aria-selected', String(tab.dataset.tab === name));
+            });
+            document.querySelectorAll('[role="tabpanel"]').forEach(panel => {
+                panel.hidden = panel.id !== `panel-${name}`;
+            });
+            history.replaceState(null, '', `#${name}`);
         }
 
-        function selectVenue(el) {
-            document.querySelectorAll('[data-venue-id]').forEach(b => b.classList.remove('selected'));
-            el.classList.add('selected');
-            selectedVenueId = el.dataset.venueId;
-            updateUrl();
+        document.querySelectorAll('[data-venue-id]').forEach(button => {
+            button.addEventListener('click', () => {
+                document.querySelectorAll('[data-venue-id]').forEach(item => item.classList.remove('selected'));
+                button.classList.add('selected');
+                activeVenueId = button.dataset.venueId;
+                updateCentreUrl();
+            });
+        });
+
+        document.querySelectorAll('[data-timeslot]').forEach(button => {
+            button.addEventListener('click', () => {
+                const value = button.dataset.timeslot;
+                if (activeTimeslots.includes(value)) {
+                    activeTimeslots = activeTimeslots.filter(item => item !== value);
+                    button.classList.remove('selected');
+                } else if (activeTimeslots.length < 2) {
+                    activeTimeslots.push(value);
+                    button.classList.add('selected');
+                }
+                updateCentreUrl();
+            });
+        });
+
+        function centreBaseUrl() {
+            return ACTIVE_BASE_TEMPLATE
+                .replace(/{activity_id}/g, ACTIVE_ACTIVITY_ID)
+                .replace(/{venue_id}/g, activeVenueId)
+                + `&date=${ACTIVE_DATE}`;
         }
 
-        function toggleSlot(el) {
-            const ts = el.dataset.ts;
-            if (selected.includes(ts)) {
-                selected = selected.filter(t => t !== ts);
-                el.classList.remove('selected');
-            } else {
-                if (selected.length >= 2) return;
-                selected.push(ts);
-                el.classList.add('selected');
-            }
-            updateUrl();
-        }
-
-        function updateUrl() {
-            const linkBox = document.getElementById('link-box');
-            const openBtn = document.getElementById('open-btn');
-            if (selected.length === 0) {
-                linkBox.textContent = '—';
-                openBtn.href = '#';
-                openBtn.classList.add('disabled');
+        function updateCentreUrl() {
+            const output = document.querySelector('#centre-url');
+            const open = document.querySelector('#centre-open');
+            if (!activeTimeslots.length) {
+                output.textContent = 'Select a time to generate the ActiveSG link.';
+                open.href = '#';
+                open.classList.add('disabled');
                 return;
             }
-            const url = buildBase() + selected.map(ts => '&timeslots=' + ts).join('');
-            linkBox.textContent = url;
-            openBtn.href = url;
-            openBtn.classList.remove('disabled');
+            const url = centreBaseUrl() + activeTimeslots.map(value => `&timeslots=${value}`).join('');
+            output.textContent = url;
+            open.href = url;
+            open.classList.remove('disabled');
         }
 
-        function copyLink() {
-            const linkBox = document.getElementById('link-box');
-            const text = linkBox.textContent;
-            if (text === '—') return;
-            navigator.clipboard.writeText(text).then(() => {
-                const el = document.getElementById('copied');
-                el.style.display = 'block';
-                setTimeout(() => el.style.display = 'none', 2000);
-            });
+        document.querySelector('#centre-copy').addEventListener('click', () => {
+            if (!activeTimeslots.length) return;
+            copyText(document.querySelector('#centre-url').textContent, 'ActiveSG link copied');
+        });
+
+        function localIsoDate(date) {
+            return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
         }
+
+        function previousDate(isoDate) {
+            const date = new Date(`${isoDate}T12:00:00`);
+            date.setDate(date.getDate() - 1);
+            return localIsoDate(date);
+        }
+
+        function hubUrl(zoneTypeId, date) {
+            const params = new URLSearchParams({ clubId: '1', zoneTypeId: String(zoneTypeId), date });
+            return `${HUB_BASE}#/FacilityBooking?${params}`;
+        }
+
+        function hubBookmarklet(zoneTypeId, date, time) {
+            const params = new URLSearchParams({ clubId: '1', zoneTypeId: String(zoneTypeId), date });
+            const targetHash = `#/FacilityBooking?${params}`;
+            const [, month, day] = date.split('-').map(Number);
+            const [hour, minute] = time.split(':').map(Number);
+            const timeLabel = `${String((hour % 12) || 12).padStart(2, '0')}:${String(minute).padStart(2, '0')} ${hour < 12 ? 'AM' : 'PM'}`;
+            const config = JSON.stringify({ targetHash, dateLabel: `${day}/${month}`, timeLabel });
+            const code = `(()=>{const c=${config};if(location.hostname!=="thekallang.perfectgym.com"){alert("Run this bookmark from a signed-in Kallang booking tab.");return}if(location.hash===c.targetHash){alert("This tab is already on the target date and may be stale. Open the staging page first.");return}location.hash=c.targetHash;let readyAt=0;const end=Date.now()+10000;const timer=setInterval(()=>{if(Date.now()>end){clearInterval(timer);alert("Target did not become available. No booking click was made.");return}const selected=document.querySelector('select[aria-label="Facility"] option:checked');if(!selected||selected.textContent.trim()!=="Any facility")return;const table=document.querySelector(".cp-calendar-table");if(!table)return;const rows=Array.from(table.querySelectorAll("tr"));const header=rows.find(row=>Array.from(row.querySelectorAll("td")).some(cell=>cell.textContent.trim().endsWith(c.dateLabel)));if(!header)return;if(!readyAt)readyAt=Date.now();const cells=Array.from(header.querySelectorAll("td"));const column=cells.findIndex(cell=>cell.textContent.trim().endsWith(c.dateLabel));const row=rows.find(candidate=>{const first=candidate.querySelector("td");return first&&first.textContent.trim()===c.timeLabel});const target=row&&Array.from(row.querySelectorAll("td"))[column];const item=target&&target.querySelector("cp\\:facility-booking-item");const action=item&&item.querySelector(".cp-btn-classes-action");if(item&&action&&item.classList.contains("is-bookable")){clearInterval(timer);action.click();return}if(Date.now()-readyAt>900){clearInterval(timer);alert("No court is available at that time. No booking click was made.")}},75)})()`;
+            return `javascript:${code}`;
+        }
+
+        document.querySelector('#hub-form').addEventListener('submit', event => {
+            event.preventDefault();
+            const zoneTypeId = Number(document.querySelector('#hub-category').value);
+            const date = document.querySelector('#hub-date').value;
+            const time = document.querySelector('#hub-time').value;
+            if (!date || !time) return;
+
+            const target = hubUrl(zoneTypeId, date);
+            const staging = hubUrl(zoneTypeId, previousDate(date));
+            const bookmarklet = hubBookmarklet(zoneTypeId, date, time);
+
+            document.querySelector('#hub-staging').href = staging;
+            document.querySelector('#hub-target').href = target;
+            document.querySelector('#hub-target-url').textContent = target;
+            document.querySelector('#hub-bookmarklet').href = bookmarklet;
+            document.querySelector('#hub-copy-staging').onclick = () => copyText(staging, 'Staging URL copied');
+            document.querySelector('#hub-copy-target').onclick = () => copyText(target, 'Target URL copied');
+            document.querySelector('#hub-copy-bookmarklet').onclick = () => copyText(bookmarklet, 'Bookmark URL copied');
+            document.querySelector('#hub-results').hidden = false;
+            document.querySelector('#hub-results').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
+
+        async function copyText(value, message) {
+            await navigator.clipboard.writeText(value);
+            showToast(message);
+        }
+
+        function showToast(message) {
+            clearTimeout(toastTimer);
+            const toast = document.querySelector('#toast');
+            toast.textContent = message;
+            toast.classList.add('show');
+            toastTimer = setTimeout(() => toast.classList.remove('show'), 1800);
+        }
+
+        const defaultHubDate = new Date();
+        defaultHubDate.setDate(defaultHubDate.getDate() + 7);
+        document.querySelector('#hub-date').value = localIsoDate(defaultHubDate);
+
+        const initialTab = location.hash === '#hub' ? 'hub' : 'centre';
+        activateTab(initialTab);
     </script>
 </body>
 </html>
